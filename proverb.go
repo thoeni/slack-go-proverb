@@ -1,6 +1,7 @@
 package main
 
 import (
+	"html"
 	"log"
 	"math/rand"
 	"net/http"
@@ -37,7 +38,7 @@ func randomProverb() (proverb, error) {
 	doc.Find("h2 a").Each(func(i int, s *goquery.Selection) {
 		quote, _ := s.Html()
 		url, _ := s.Attr("href")
-		proverbs = append(proverbs, proverb{quote, url})
+		proverbs = append(proverbs, proverb{html.UnescapeString(quote), url})
 	})
 
 	seed := rand.NewSource(time.Now().UnixNano())

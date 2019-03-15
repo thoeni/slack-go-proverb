@@ -1,6 +1,10 @@
 package main
 
 import (
+	"encoding/json"
+	"net/http"
+
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
@@ -21,8 +25,14 @@ type action struct {
 	URL  string `json:"url"`
 }
 
-func HandleRequest() (response, error) {
+func HandleRequest() (events.APIGatewayProxyResponse, error) {
 	p, err := randomProverb()
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			Headers:    map[string]string{"Content-Type": "application/json; charset=UTF-8"},
+			StatusCode: http.StatusInternalServerError,
+		}, err
+	}
 
 	resp := response{
 		Text:         p.quote,
@@ -37,7 +47,19 @@ func HandleRequest() (response, error) {
 		}},
 	}
 
-	return resp, err
+	b, err := json.Marshal(resp)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			Headers:    map[string]string{"Content-Type": "application/json; charset=UTF-8"},
+			StatusCode: http.StatusInternalServerError,
+		}, err
+	}
+
+	return events.APIGatewayProxyResponse{
+		Headers:    map[string]string{"Content-Type": "application/json; charset=UTF-8"},
+		StatusCode: http.StatusOK,
+		Body:       string(b),
+	}, nil
 }
 
 func main() {
