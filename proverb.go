@@ -14,11 +14,11 @@ type proverb struct {
 	url   string
 }
 
-func randomProverb() proverb {
+func randomProverb() (proverb, error) {
 	// Request the HTML page.
 	res, err := http.Get("https://raw.githubusercontent.com/go-proverbs/go-proverbs.github.io/master/index.html")
 	if err != nil {
-		log.Fatal(err)
+		return proverb{}, err
 	}
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
@@ -28,7 +28,7 @@ func randomProverb() proverb {
 	// Load the HTML document
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return proverb{}, err
 	}
 
 	var proverbs []proverb
@@ -42,5 +42,5 @@ func randomProverb() proverb {
 
 	seed := rand.NewSource(time.Now().UnixNano())
 	r := rand.New(seed)
-	return proverbs[r.Intn(len(proverbs))]
+	return proverbs[r.Intn(len(proverbs))], nil
 }

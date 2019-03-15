@@ -1,29 +1,8 @@
 package main
 
 import (
-	"encoding/json"
-	"log"
-	"net/http"
+	"github.com/aws/aws-lambda-go/lambda"
 )
-
-/*
-{
-    "text": "Errors are values.",
-    "response_type": "ephemeral",
-    "attachments": [
-        {
-            "fallback": "https://flights.example.com/book/r123456",
-            "actions": [
-                {
-                    "type": "button",
-                    "text": "Tell me more... 📹",
-                    "url": "https://flights.example.com/book/r123456"
-                }
-            ]
-        }
-    ]
-}
-*/
 
 type response struct {
 	Text         string       `json:"text"`
@@ -42,13 +21,8 @@ type action struct {
 	URL  string `json:"url"`
 }
 
-func main() {
-	http.HandleFunc("/proverb", proverbHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
-}
-
-func proverbHandler(w http.ResponseWriter, r *http.Request) {
-	p := randomProverb()
+func HandleRequest() (response, error) {
+	p, err := randomProverb()
 
 	resp := response{
 		Text:         p.quote,
@@ -63,8 +37,9 @@ func proverbHandler(w http.ResponseWriter, r *http.Request) {
 		}},
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	return resp, err
+}
+
+func main() {
+	lambda.Start(HandleRequest)
 }
