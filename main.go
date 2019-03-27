@@ -36,7 +36,7 @@ func HandleRequest() (events.APIGatewayProxyResponse, error) {
 
 	resp := response{
 		Text:         p.quote,
-		ResponseType: "ephemeral",
+		ResponseType: "in_channel",
 		Attachments: []attachment{{
 			Fallback: p.url,
 			Actions: []action{{
